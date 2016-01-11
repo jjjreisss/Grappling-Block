@@ -26,14 +26,6 @@ var mainState = {
     game.world.setBounds(0,0,300,700);
     game.camera.y = 75;
 
-    // Display the bird on the screen
-    this.angel = this.game.add.sprite(125, 650, 'angel');
-    game.physics.arcade.enable(this.angel);
-    this.angel.body.collideWorldBounds = true;
-    // this.angel.body.checkCollision.left = true;
-    // this.angel.body.checkCollision.right = true;
-    this.angel.body.bounce.setTo(1,1);
-
     // Call the 'jump' function when the spacekey is hit
     var spaceKey = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     spaceKey.onDown.add(this.jump, this);
@@ -50,6 +42,14 @@ var mainState = {
     this.platforms.createMultiple(6, 'platform');
     // this.platforms.body.collideWorldBounds = true;
     // this.platforms.body.checkCollision.up = false;
+
+    // Display the bird on the screen
+    this.angel = this.game.add.sprite(125, 650, 'angel');
+    game.physics.arcade.enable(this.angel);
+    this.angel.body.collideWorldBounds = true;
+    // this.angel.body.checkCollision.left = true;
+    // this.angel.body.checkCollision.right = true;
+    this.angel.body.bounce.setTo(1,1);
 
     for (var i = 0; i < 2; i++) {
       var platform = this.platforms.getFirstDead();
