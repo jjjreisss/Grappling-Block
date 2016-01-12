@@ -13,6 +13,10 @@ var mainState = {
     game.load.image('platform', 'assets/pipe.png');
 
     game.load.image('hook', 'assets/hook.png');
+
+    game.load.image('leftCloud', 'assets/cloud-left.png');
+
+    game.load.image('rightCloud', 'assets/cloud-right.png');
   },
 
   create: function() {
@@ -20,6 +24,7 @@ var mainState = {
     this.shootable = true;
     this.courseScore = 0;
     this.maxHeight = 0;
+    this.hookStuck = false;
 
     // Set the physics system
     game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -36,12 +41,35 @@ var mainState = {
     var downArrowKey = this.game.input.keyboard.addKey(37);
     downArrowKey.onDown.add(this.decelerate, this);
 
+    this.clouds = game.add.group();
+    this.clouds.enableBody = true;
+    this.clouds.createMultiple(4, 'leftCloud');
+    this.clouds.createMultiple(4, 'rightCloud');
+
+    for (var i = 0; i < 8; i++) {
+      var cloud = this.clouds.getFirstDead();
+      cloud.scale.x = Math.random()*0.5 + 0.3;
+      cloud.scale.y = cloud.scale.x;
+
+      var x = (300 + cloud.scale.x*300) * Math.random() - cloud.scale.x;
+      var y = (625 + cloud.scale.y*150) * Math.random() - cloud.scale.x;
+
+      cloud.reset(x, y);
+      cloud.body.velocity.x = Math.random() * 100 - 50;;
+
+      cloud.checkWorldBounds = true;
+      cloud.outOfBoundsKill = true;
+
+      cloud.events.onKilled.add(this.cloudDied, this);
+    }
+
     this.platforms = game.add.group();
     this.platforms.enableBody = true;
     this.platforms.inputEnabled = true;
     this.platforms.createMultiple(6, 'platform');
     // this.platforms.body.collideWorldBounds = true;
     // this.platforms.body.checkCollision.up = false;
+
 
     // Display the bird on the screen
     this.angel = this.game.add.sprite(125, 650, 'angel');
@@ -50,6 +78,11 @@ var mainState = {
     // this.angel.body.checkCollision.left = true;
     // this.angel.body.checkCollision.right = true;
     this.angel.body.bounce.setTo(1,1);
+
+    this.chainlinks = game.add.group();
+    this.chainlinks.enableBody = true;
+    this.chainlinks.inputEnabled = true;
+    this.chainlinks.createMultiple(30, 'hook');
 
     for (var i = 0; i < 2; i++) {
       var platform = this.platforms.getFirstDead();
@@ -84,7 +117,10 @@ var mainState = {
 
     game.input.onDown.add(this.clickHandler, this);
 
-    this.game.physics.arcade.overlap(this.platforms, this.hook, this.collisionHandler, null, this);
+    this.game.physics.arcade.overlap(this.platforms, this.hook, this.hookPlatformCollisionHandler, null, this);
+    this.game.physics.arcade.overlap(this.hook, this.angel, this.hookAngelCollisionHandler, null, this);
+    this.game.physics.arcade.overlap(this.chainlinks, this.angel, this.chainlinkAngelCollisionHandler, null, this);
+
 
 
     if (this.phase === "beforeFly") {
@@ -128,7 +164,7 @@ var mainState = {
       this.shootable = true;
     }
 
-    if (this.hook.alive) {
+    if (this.hook.alive && !this.hookStuck) {
       this.hook.body.velocity.y += 25;
       if (this.hook.body.velocity.x < 0) {
         this.hook.body.velocity.x += 4;
@@ -171,6 +207,7 @@ var mainState = {
   },
 
   addOnePlatform: function(x, y) {
+    console.log('hi')
     var platform = this.platforms.getFirstDead();
 
     platform.reset(x, y);
@@ -180,6 +217,37 @@ var mainState = {
     platform.outOfBoundsKill = true;
   },
 
+  platformDied: function() {
+    this.addOnePlatform(Math.floor(Math.random()*175), 75);
+  },
+
+  addOneCloud: function(x, y) {
+    var cloud = this.clouds.getFirstDead();
+    cloud.scale.x = Math.random()*0.3 + 0.2;
+    cloud.scale.y = cloud.scale.x;
+    var cloudVelocity = Math.random() * 100 - 50;
+
+    if (cloudVelocity > 0) {
+      var x = -cloud.scale.x*300;
+      var y = (625 + cloud.scale.x) * Math.random() - cloud.scale.x;
+    } else {
+      var x = 300;
+      var y = (625 + cloud.scale.x) * Math.random() - cloud.scale.x;
+    }
+
+    cloud.reset(x, y);
+    cloud.body.velocity.x = cloudVelocity;
+
+    cloud.checkWorldBounds = true;
+    cloud.outOfBoundsKill = true;
+
+    cloud.events.onKilled.add(this.cloudDied, this);
+  },
+
+  cloudDied: function() {
+    // this.addOneCloud(Math.floor(Math.random()*175), 75);
+    this.addOneCloud();
+  },
 
   accelerate: function() {
     this.velocity += 200;
@@ -197,10 +265,6 @@ var mainState = {
     }.bind(this));
   },
 
-  platformDied: function() {
-    this.addOnePlatform(Math.floor(Math.random()*175), 75);
-  },
-
   shoot: function() {
     if (this.hook.alive === false) {
       this.hook.reset(this.angel.position.x + 12.5, this.angel.position.y);
@@ -214,18 +278,41 @@ var mainState = {
     }
   },
 
-  collisionHandler: function() {
-    if (this.hook.position.y < this.shootHeight - 10) {
+  hookPlatformCollisionHandler: function() {
+    if (this.hook.position.y < this.shootHeight - 10 && !this.hookStuck) {
       this.phase = "beforeFly";
       this.bottomPlatformY = this.hook.position.y;
-      var deltaY = this.angel.position.y - this.hook.position.y
-      var deltaX = this.angel.position.x - this.hook.position.x;
+      var deltaX = this.angel.position.x + 25 - this.hook.position.x;
       var deltaY = this.angel.position.y - this.hook.position.y;
       var norm = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
       this.angel.body.velocity.x = -deltaX*4;
       this.angel.body.velocity.y = -deltaY*4;
-      this.hook.kill();
+      this.hook.body.velocity.x = 0;
+      this.hook.body.velocity.y = 0;
+      this.hookStuck = true;
+
+      for (var i = 1; i < Math.floor(norm / 30)+1; i++) {
+        console.log(Math.floor(norm / 30))
+        var chainlink = this.chainlinks.getFirstDead();
+        chainlink.scale.x = 0.5;
+        chainlink.scale.y = 0.5;
+
+        var x = 25 + -i * Math.floor(deltaX / Math.floor(norm / 30)) + this.angel.position.x;
+        var y = -i * Math.floor(deltaY / Math.floor(norm / 30)) + this.angel.position.y;
+
+        chainlink.reset(x, y);
+
+      }
     }
+  },
+
+  hookAngelCollisionHandler: function() {
+    this.hookStuck = false;
+    this.hook.kill();
+  },
+
+  chainlinkAngelCollisionHandler: function(a, b) {
+    b.kill();
   }
 
 };
