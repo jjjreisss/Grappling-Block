@@ -82,7 +82,7 @@ var mainState = {
     this.chainlinks = game.add.group();
     this.chainlinks.enableBody = true;
     this.chainlinks.inputEnabled = true;
-    this.chainlinks.createMultiple(30, 'hook');
+    this.chainlinks.createMultiple(60, 'hook');
 
     for (var i = 0; i < 2; i++) {
       var platform = this.platforms.getFirstDead();
@@ -161,6 +161,7 @@ var mainState = {
 
     if (this.hook.position.y < 10 || this.hook.position.y > 674) {
       this.hook.kill();
+      this.hookStuck = false;
       this.shootable = true;
     }
 
@@ -291,14 +292,14 @@ var mainState = {
       this.hook.body.velocity.y = 0;
       this.hookStuck = true;
 
-      for (var i = 1; i < Math.floor(norm / 30)+1; i++) {
-        console.log(Math.floor(norm / 30))
+      for (var i = 1; i < Math.floor(norm / 15)+1; i++) {
+        console.log(Math.floor(norm / 15))
         var chainlink = this.chainlinks.getFirstDead();
-        chainlink.scale.x = 0.5;
-        chainlink.scale.y = 0.5;
+        chainlink.scale.x = 0.2;
+        chainlink.scale.y = 0.2;
 
-        var x = 25 + -i * Math.floor(deltaX / Math.floor(norm / 30)) + this.angel.position.x;
-        var y = -i * Math.floor(deltaY / Math.floor(norm / 30)) + this.angel.position.y;
+        var x = 25 + -i * Math.floor(deltaX / Math.floor(norm / 15)) + this.angel.position.x;
+        var y = -i * Math.floor(deltaY / Math.floor(norm / 15)) + this.angel.position.y;
 
         chainlink.reset(x, y);
 
@@ -309,6 +310,9 @@ var mainState = {
   hookAngelCollisionHandler: function() {
     this.hookStuck = false;
     this.hook.kill();
+    this.chainlinks.forEach(function(chainlink) {
+      chainlink.kill();
+    })
   },
 
   chainlinkAngelCollisionHandler: function(a, b) {
