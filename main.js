@@ -17,6 +17,9 @@ var mainState = {
     game.load.image('leftCloud', 'assets/cloud-left.png');
 
     game.load.image('rightCloud', 'assets/cloud-right.png');
+
+    game.load.image('chainlink', 'assets/chainlink.png');
+
   },
 
   create: function() {
@@ -82,7 +85,7 @@ var mainState = {
     this.chainlinks = game.add.group();
     this.chainlinks.enableBody = true;
     this.chainlinks.inputEnabled = true;
-    this.chainlinks.createMultiple(60, 'hook');
+    this.chainlinks.createMultiple(60, 'chainlink');
 
     for (var i = 0; i < 2; i++) {
       var platform = this.platforms.getFirstDead();
@@ -124,10 +127,12 @@ var mainState = {
 
 
     if (this.phase === "beforeFly") {
+      this.hook.body.velocity.y = this.velocity;
       this.maxHeight = 700 - this.angel.position.y;
       // this.angel.body.velocity.y -= this.deltaY/5;
       // this.angel.body.velocity.x -= this.deltaX/5;
       if (this.angel.position.y <= this.bottomPlatformY) {
+        this.hook.kill();
         this.velocity = -this.angel.body.velocity.y;
         console.log(this.velocity);
         this.propogateVelocity();
@@ -292,14 +297,14 @@ var mainState = {
       this.hook.body.velocity.y = 0;
       this.hookStuck = true;
 
-      for (var i = 1; i < Math.floor(norm / 15)+1; i++) {
-        console.log(Math.floor(norm / 15))
+      for (var i = 1; i < Math.floor(norm / 10)+1; i++) {
+        console.log(Math.floor(norm / 10))
         var chainlink = this.chainlinks.getFirstDead();
-        chainlink.scale.x = 0.2;
-        chainlink.scale.y = 0.2;
+        chainlink.scale.x = 0.15;
+        chainlink.scale.y = 0.15;
 
-        var x = 25 + -i * Math.floor(deltaX / Math.floor(norm / 15)) + this.angel.position.x;
-        var y = -i * Math.floor(deltaY / Math.floor(norm / 15)) + this.angel.position.y;
+        var x = 25 + -i * deltaX / Math.floor(norm / 10) + this.angel.position.x;
+        var y = -(i-1) * deltaY / Math.floor(norm / 10) + this.angel.position.y;
 
         chainlink.reset(x, y);
 
