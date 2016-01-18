@@ -284,7 +284,6 @@ var mainState = {
       this.hook.body.velocity.y = y / this.hookNorm * 1700;
       this.shootable = false;
       this.shootHeight = this.angel.position.y;
-      console.log(this.hook.body.velocity.x)
     }
   },
 
