@@ -277,13 +277,14 @@ var mainState = {
   shoot: function() {
     if (this.hook.alive === false) {
       this.hook.reset(this.angel.position.x + 12.5, this.angel.position.y);
-      var x = this.game.input.mousePointer.x - this.angel.position.x;
+      var x = this.game.input.mousePointer.x - (this.angel.position.x + 12.5);
       var y = this.game.input.mousePointer.y - this.angel.position.y;
       this.hookNorm = Math.sqrt(Math.pow(x, 2) +  Math.pow(y, 2));
       this.hook.body.velocity.x = x / this.hookNorm * 1700;
       this.hook.body.velocity.y = y / this.hookNorm * 1700;
       this.shootable = false;
       this.shootHeight = this.angel.position.y;
+      console.log(this.hook.body.velocity.x)
     }
   },
 
