@@ -134,7 +134,6 @@ var mainState = {
       if (this.angel.position.y <= this.bottomPlatformY) {
         this.hook.kill();
         this.velocity = -this.angel.body.velocity.y;
-        console.log(this.velocity);
         this.propogateVelocity();
         this.angel.body.velocity.y = 0;
         this.phase = "fly";
@@ -204,6 +203,11 @@ var mainState = {
   restartGame: function() {
     // Start the 'main' state, which restarts the game
     this.velocity = 0;
+    this.shootable = true;
+    this.courseScore = 0;
+    this.maxHeight = 0;
+    this.hookStuck = false;
+    this.velocity = 0;
     this.angel.body.velocity.x = 0;
     this.angel.body.velocity.y = 0;
     this.gameStarted = false;
@@ -213,7 +217,6 @@ var mainState = {
   },
 
   addOnePlatform: function(x, y) {
-    console.log('hi')
     var platform = this.platforms.getFirstDead();
 
     platform.reset(x, y);
@@ -298,7 +301,6 @@ var mainState = {
       this.hookStuck = true;
 
       for (var i = 1; i < Math.floor(norm / 10)+1; i++) {
-        console.log(Math.floor(norm / 10))
         var chainlink = this.chainlinks.getFirstDead();
         chainlink.scale.x = 0.15;
         chainlink.scale.y = 0.15;
