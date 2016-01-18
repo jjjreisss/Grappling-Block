@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8" />
-  <title> Angel </title>
+  <title> Grappling Block </title>
 
   <script type="text/javascript" src="phaser.min.js"></script>
   <script type="text/javascript" src="main.js"></script>
@@ -12,9 +12,22 @@
     body {
       text-align: center;
     }
-
     #gameDiv {
       display: inline-block;
+    }
+    .game-and-directions {
+      width: 730px;
+      display: inline-block;
+    }
+    .left {
+      float: left;
+      width: 200px;
+      margin-top: 200px;
+    }
+    .right {
+      float: right;
+      width: 200px;
+      margin-top: 200px;
     }
   </style>
 
@@ -22,8 +35,21 @@
 
 <body>
   <h1> Grappling Block </h1>
-  <h3> Click to start </h3>
-  <div id="gameDiv"> </div>
+  <h3> Click to throw your grappling hook. </h3>
+
+  <div class="game-and-directions">
+    <div class="left">
+      <h4>
+        The further you are from the platform you grab, the faster you'll go.
+      </h4>
+    </div>
+    <div id="gameDiv"> </div>
+    <div class="right">
+      <h4>
+        Feel free to bounce your hook off the wall! You can bounce yourself too.
+      </h4>
+    </div>
+  </div>
 
 </body>
 

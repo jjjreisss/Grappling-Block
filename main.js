@@ -17,6 +17,9 @@ var mainState = {
     game.load.image('leftCloud', 'assets/cloud-left.png');
 
     game.load.image('rightCloud', 'assets/cloud-right.png');
+
+    game.load.image('chainlink', 'assets/chainlink.png');
+
   },
 
   create: function() {
@@ -82,7 +85,7 @@ var mainState = {
     this.chainlinks = game.add.group();
     this.chainlinks.enableBody = true;
     this.chainlinks.inputEnabled = true;
-    this.chainlinks.createMultiple(60, 'hook');
+    this.chainlinks.createMultiple(60, 'chainlink');
 
     for (var i = 0; i < 2; i++) {
       var platform = this.platforms.getFirstDead();
@@ -124,12 +127,13 @@ var mainState = {
 
 
     if (this.phase === "beforeFly") {
+      this.hook.body.velocity.y = this.velocity;
       this.maxHeight = 700 - this.angel.position.y;
       // this.angel.body.velocity.y -= this.deltaY/5;
       // this.angel.body.velocity.x -= this.deltaX/5;
       if (this.angel.position.y <= this.bottomPlatformY) {
+        this.hook.kill();
         this.velocity = -this.angel.body.velocity.y;
-        console.log(this.velocity);
         this.propogateVelocity();
         this.angel.body.velocity.y = 0;
         this.phase = "fly";
@@ -199,6 +203,11 @@ var mainState = {
   restartGame: function() {
     // Start the 'main' state, which restarts the game
     this.velocity = 0;
+    this.shootable = true;
+    this.courseScore = 0;
+    this.maxHeight = 0;
+    this.hookStuck = false;
+    this.velocity = 0;
     this.angel.body.velocity.x = 0;
     this.angel.body.velocity.y = 0;
     this.gameStarted = false;
@@ -208,7 +217,6 @@ var mainState = {
   },
 
   addOnePlatform: function(x, y) {
-    console.log('hi')
     var platform = this.platforms.getFirstDead();
 
     platform.reset(x, y);
@@ -269,7 +277,7 @@ var mainState = {
   shoot: function() {
     if (this.hook.alive === false) {
       this.hook.reset(this.angel.position.x + 12.5, this.angel.position.y);
-      var x = this.game.input.mousePointer.x - this.angel.position.x;
+      var x = this.game.input.mousePointer.x - (this.angel.position.x + 12.5);
       var y = this.game.input.mousePointer.y - this.angel.position.y;
       this.hookNorm = Math.sqrt(Math.pow(x, 2) +  Math.pow(y, 2));
       this.hook.body.velocity.x = x / this.hookNorm * 1700;
@@ -292,14 +300,13 @@ var mainState = {
       this.hook.body.velocity.y = 0;
       this.hookStuck = true;
 
-      for (var i = 1; i < Math.floor(norm / 15)+1; i++) {
-        console.log(Math.floor(norm / 15))
+      for (var i = 1; i < Math.floor(norm / 10)+1; i++) {
         var chainlink = this.chainlinks.getFirstDead();
-        chainlink.scale.x = 0.2;
-        chainlink.scale.y = 0.2;
+        chainlink.scale.x = 0.15;
+        chainlink.scale.y = 0.15;
 
-        var x = 25 + -i * Math.floor(deltaX / Math.floor(norm / 15)) + this.angel.position.x;
-        var y = -i * Math.floor(deltaY / Math.floor(norm / 15)) + this.angel.position.y;
+        var x = 25 + -i * deltaX / Math.floor(norm / 10) + this.angel.position.x;
+        var y = -(i-1) * deltaY / Math.floor(norm / 10) + this.angel.position.y;
 
         chainlink.reset(x, y);
 
