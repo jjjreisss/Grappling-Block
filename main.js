@@ -202,6 +202,8 @@ var mainState = {
 // Restart the game
   restartGame: function() {
     // Start the 'main' state, which restarts the game
+    highScore = Math.max(highScore, this.score());
+    highScoreText.setText(highScore);
     this.velocity = 0;
     this.shootable = true;
     this.courseScore = 0;
@@ -211,8 +213,6 @@ var mainState = {
     this.angel.body.velocity.x = 0;
     this.angel.body.velocity.y = 0;
     this.gameStarted = false;
-    highScore = Math.max(highScore, this.score());
-    highScoreText.setText(highScore);
     game.state.start('main');
   },
 
