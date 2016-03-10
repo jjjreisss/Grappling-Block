@@ -28,21 +28,9 @@ var mainState = {
     this.courseScore = 0;
     this.maxHeight = 0;
     this.hookStuck = false;
-
-    // Set the physics system
     game.physics.startSystem(Phaser.Physics.ARCADE);
     game.world.setBounds(0,0,300,700);
     game.camera.y = 75;
-
-    // Call the 'jump' function when the spacekey is hit
-    var spaceKey = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-    spaceKey.onDown.add(this.jump, this);
-
-    var upArrowKey = this.game.input.keyboard.addKey(38);
-    upArrowKey.onDown.add(this.accelerate, this);
-
-    var downArrowKey = this.game.input.keyboard.addKey(37);
-    downArrowKey.onDown.add(this.decelerate, this);
 
     this.clouds = game.add.group();
     this.clouds.enableBody = true;
